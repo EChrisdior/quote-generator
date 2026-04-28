@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Quote Generator SA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      width: 80%;
+      border-radius: 5px;
+      border: none;
+    }
+
+    button {
+      background: red;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .item {
+      background: #222;
+      padding: 10px;
+      margin: 10px auto;
+      border-radius: 10px;
+      max-width: 500px;
+    }
+
+    .item input {
+      width: calc(100% - 20px);
+      display: block;
+      margin: 8px auto;
+    }
+
+    #output {
+      margin-top: 20px;
+      white-space: pre-line;
+      background: #222;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+
+    #whatsappBtn {
+      width: auto;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔥 Universal WhatsApp Quote Generator</h2>
+
+  <input id="businessName" placeholder="Your Business Name" type="text">
+
+  <div id="items"></div>
+
+  <button type="button" onclick="addItem()">+ Add Item</button>
+
+  <input id="labour" placeholder="Labour Cost (R)" type="number" min="0">
+  <input id="markup" placeholder="Markup % (e.g. 20)" type="number" min="0">
+
+  <br>
+
+  <input id="code" placeholder="Enter unlock code" type="text">
+  <button type="button" onclick="unlock()">Unlock</button>
+
+  <button type="button" onclick="generateQuote()">Generate Quote</button>
+
+  <div id="output"></div>
+
+  <button id="whatsappBtn" style="display:none;" type="button" onclick="sendWhatsApp()">Send to WhatsApp</button>
+
+  <script>
+    let unlocked = false;
+    let itemCount = 0;
+
+    function unlock() {
+      const code = document.getElementById('code').value.trim();
+      if (code === '1234') {
+        unlocked = true;
+        alert('Unlocked! You can now generate a quote.');
+      } else {
+        alert('Wrong code. Please try again.');
+      }
+    }
+
+    function addItem() {
+      itemCount += 1;
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `
+        <input placeholder="Item name" id="name${itemCount}" type="text">
+        <input placeholder="Price per unit (R)" id="price${itemCount}" type="number" min="0" step="0.01">
+        <input placeholder="Quantity" id="qty${itemCount}" type="number" min="0" step="1">
+      `;
+      document.getElementById('items').appendChild(div);
+    }
+
+    function generateQuote() {
+      if (!unlocked) {
+        alert('Please unlock first (R5)');
+        return;
+      }
+
+      let total = 0;
+      let breakdown = '';
+
+      for (let i = 1; i <= itemCount; i += 1) {
+        const name = document.getElementById(`name${i}`)?.value.trim();
+        const price = parseFloat(document.getElementById(`price${i}`)?.value) || 0;
+        const qty = parseFloat(document.getElementById(`qty${i}`)?.value) || 0;
+
+        if (name) {
+          const subtotal = price * qty;
+          total += subtotal;
+          breakdown += `- ${name}: R${subtotal.toFixed(2)}\n`;
+        }
+      }
+
+      const labour = parseFloat(document.getElementById('labour').value) || 0;
+      const markup = parseFloat(document.getElementById('markup').value) || 0;
+
+      total += labour;
+      const totalWithMarkup = total + (total * markup / 100);
+
+      const business = document.getElementById('businessName').value.trim() || 'Your Business';
+
+      const message = `Hi 👋\n\nThank you for your inquiry.\n\nHere is your quote:\n\n${breakdown}\nLabour: R${labour.toFixed(2)}\nMarkup: ${markup.toFixed(2)}%\n\nTotal (incl. markup): R${totalWithMarkup.toFixed(2)}\n\nPlease let us know if you'd like to proceed.\n\nKind regards,\n${business}`;
+
+      document.getElementById('output').innerText = message;
+      document.getElementById('whatsappBtn').style.display = 'inline-block';
+    }
+
+    function sendWhatsApp() {
+      const text = encodeURIComponent(document.getElementById('output').innerText);
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+  </script>
+</body>
+</html>
